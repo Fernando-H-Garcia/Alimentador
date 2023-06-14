@@ -973,9 +973,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 String? calibracao = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ConfigurationPage(),
-                                  ),
-                                );
+                                    builder: (context) => ConfigurationPage(
+                                      connectedDeviceName: _connectedDeviceName,
+                                    ),
+                                ));
 
                                 // Verifica se a string de retorno não é nula
                                 if (calibracao != null) {
@@ -1122,12 +1123,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 }
 
 // Configuration page
-class ConfigurationPage extends StatefulWidget {
+class ConfigurationPage extends StatefulWidget{
+final String connectedDeviceName;
+
+ConfigurationPage({required this.connectedDeviceName});
   @override
   _ConfigurationPageState createState() => _ConfigurationPageState();
 }
 
 class _ConfigurationPageState extends State<ConfigurationPage> {
+
   TimeOfDay selectedTime = TimeOfDay.now();
   TimeOfDay selectedTimeFim = TimeOfDay.now();
   final pesoController = TextEditingController();
@@ -1214,7 +1219,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text('Configurar A300'),
+        title: Text('Configurar ${widget.connectedDeviceName}'),
       ),
       body: SingleChildScrollView(
         child: Padding(
