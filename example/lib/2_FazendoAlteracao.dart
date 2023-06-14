@@ -54,7 +54,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   // Tab controller for switching between tabs
   late TabController _tabController;
 // Declaração da variável de controle
-  bool reenviarMensagem = false; // Variável de controle para reenvio de mensagem
+  bool reenviarMensagem =
+      false; // Variável de controle para reenvio de mensagem
 
   //Lista para escutar o que o ESP enviar
   List<String> _receivedMessages = [];
@@ -84,6 +85,37 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   StreamSubscription<BluetoothDiscoveryResult>? _streamSubscription;
 
   String _connectedDeviceName = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 5,
+        title: Center(
+          child: Text(
+            widget.title,
+            textAlign: TextAlign.center, // Centralize o título
+          ),
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(icon: Icon(Icons.bluetooth), text: 'Bluetooth'),
+            Tab(icon: Icon(Icons.settings), text: 'A300'),
+            Tab(icon: Icon(Icons.file_upload), text: 'Controle'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildBluetoothTab(),
+          _buildA300Tab(),
+          _buildControleTab(),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -181,37 +213,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 5,
-        title: Center(
-          child: Text(
-            widget.title,
-            textAlign: TextAlign.center, // Centralize o título
-          ),
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(icon: Icon(Icons.bluetooth), text: 'Bluetooth'),
-            Tab(icon: Icon(Icons.settings), text: 'A300'),
-            Tab(icon: Icon(Icons.file_upload), text: 'Controle'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildBluetoothTab(),
-          _buildA300Tab(),
-          _buildControleTab(),
-        ],
-      ),
-    );
-  }
-
 // Method to stop discovery
   void _stopDiscovery() async {
     // Cancel the stream subscription if not null
@@ -239,7 +240,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       connection = await BluetoothConnection.toAddress(device.address);
       _refreshList();
       _showToast(context, 'Conectado a ${device.name}');
-
+      _receivedMessages.clear();
+      Timer(Duration(milliseconds: 1000), () async {
+        await _sendMessage("Info");
+      });
+      Timer(Duration(milliseconds: 1000), () {
+        goToA300Tab();
+      });
       // Start listening to the device
       _startListening();
     } catch (exception) {
@@ -283,7 +290,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
       String result = await _validateMessage(message);
 
-      if (result.isNotEmpty&& result!="") {
+      if (result.isNotEmpty && result != "") {
         String processedText = _processReceivedText(result);
         _receivedMessages.add(processedText);
       }
@@ -299,8 +306,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _refreshList();
       _showToast(context, "Desconectado");
 
-        _pressCount=1;// Reseta contador da calibração caso desconecte no meio da calibração
-
+      _pressCount =
+          1; // Reseta contador da calibração caso desconecte no meio da calibração
     });
 
     setState(() {
@@ -313,7 +320,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Future<bool> _sendMessage(String message) async {
     int crc = calcularCRC(message); // Calcula o CRC da mensagem
 
-    String messageWithCRC = '<$message-$crc>'; // Adiciona o CRC à mensagem no formato correto
+    String messageWithCRC =
+        '<$message-$crc>'; // Adiciona o CRC à mensagem no formato correto
     encodedMessage = Uint8List.fromList(utf8.encode(messageWithCRC));
 
     if (message.isNotEmpty && message != "ACK") {
@@ -329,7 +337,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           await ackCompleter.future.timeout(Duration(milliseconds: 2000));
           print('Mensagem($messageWithCRC) enviada e ACK recebido');
           // Mensagem enviada com sucesso, ACK recebido
-          reenviarMensagem = false; // Define que a próxima mensagem não precisa ser reenviada
+          reenviarMensagem =
+              false; // Define que a próxima mensagem não precisa ser reenviada
           return true;
         } catch (erro) {
           // Timeout expirado ou erro ao aguardar o ACK
@@ -348,15 +357,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     if (reenviarMensagem) {
       // Verifica se a mensagem anterior precisa ser reenviada
-      reenviarMensagem = false; // Define que a próxima mensagem não precisa ser reenviada
+      reenviarMensagem =
+          false; // Define que a próxima mensagem não precisa ser reenviada
       return await _sendMessage(ultima); // Reenvia a mensagem anterior
     }
 
     return false;
   }
-
-
-
 
   int calcularCRC(String str) {
     int crc = 0;
@@ -369,10 +376,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   Future<String> _validateMessage(String message) async {
-    message = message.trim(); // Remove espaços em branco no início e no final da mensagem
+    message = message
+        .trim(); // Remove espaços em branco no início e no final da mensagem
     print('Recebido para validar: $message');
 
-    if (message.length > 0 && message.startsWith('<') && message.endsWith('>')) {
+    if (message.length > 0 &&
+        message.startsWith('<') &&
+        message.endsWith('>')) {
       // Remove os caracteres de formatação '<' e '>'
       String cleanedMessage = message.substring(1, message.length - 1);
 
@@ -430,7 +440,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return '';
   }
 
-
   String _processReceivedText(String text) {
     print("Mensagem atual: $text");
     print("Ultima mensagem: $ultima");
@@ -443,40 +452,40 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     final Map<String, String> codeMap = {
       "#=": "###############################",
-      "Arre=":  "Arremesso-------------------->",
-      "Ci=":    "                    Calibração Iniciada!\n "
-                "\n1° Antes de continuar, certifique-se de encher o equipamento com ração e apertar o botão até encher completamente a rosca!\n"
-                "\n2° Tenha em mãos uma balança com precisão de pelo menos 5g\n"
-                "\n3° Em seguida, coloque um pote para armazenar a primeira porção de ração, aperto o botão Calibrar e aguarde!\n",
-      "Fim1=":  "                   Fim da primeira porção\n "
-                "Pese a ração, digite o peso no campo abaixo e aperte enviar.\n",
-      "Fim2=":  "                   Fim da Segunda porção\n "
-                "Pese a ração, digite o peso no campo abaixo e aperte enviar.\n",
-      "RecA=":   "O peso digitado foi=",
-      "RecB=":   "O peso digitado foi=",
-      "C2="  :  "\nRecoloque o pote para armazenar a segunda porção de ração, aperte o botão Calibrar e aguarde!\n",
-      "FimC=":  "Calibração Finalizada!",
-      "FimA=":  "Fim do arremesso!",
-      "FimP=":  "Fim da porção:",
-      "FimR=":  "Fora do periodo de Alimentação!",
-      "H=":     "Data e Hora",
-      "Hi=":    "Hora do Início da Alimentação",
-      "Hf=":    "Hora do Fim da Alimentação",
-      "Int=":   "Intervalo----------------------->",
-      "IntA=":  "Intervalo entre cada arremesso",
+      "Arre=": "Arremesso-------------------->",
+      "Ci=": "                    Calibração Iniciada!\n "
+          "\n1° Antes de continuar, certifique-se de encher o equipamento com ração e apertar o botão até encher completamente a rosca!\n"
+          "\n2° Tenha em mãos uma balança com precisão de pelo menos 5g\n"
+          "\n3° Em seguida, coloque um pote para armazenar a primeira porção de ração, aperto o botão Calibrar e aguarde!\n",
+      "Fim1=": "                   Fim da primeira porção\n "
+          "Pese a ração, digite o peso no campo abaixo e aperte enviar.\n",
+      "Fim2=": "                   Fim da Segunda porção\n "
+          "Pese a ração, digite o peso no campo abaixo e aperte enviar.\n",
+      "RecA=": "O peso digitado foi=",
+      "RecB=": "O peso digitado foi=",
+      "C2=":
+          "\nRecoloque o pote para armazenar a segunda porção de ração, aperte o botão Calibrar e aguarde!\n",
+      "FimC=": "Calibração Finalizada!",
+      "FimA=": "Fim do arremesso!",
+      "FimP=": "Fim da porção:",
+      "FimR=": "Fora do periodo de Alimentação!",
+      "H=": "Data e Hora",
+      "Hi=": "Hora do Início da Alimentação",
+      "Hf=": "Hora do Fim da Alimentação",
+      "Int=": "Intervalo----------------------->",
+      "IntA=": "Intervalo entre cada arremesso",
       "ITemp=": "Intervalo entre cada porção",
-      "IniA=":  "Iniciando alimentação:",
-      "IniP=":  "Programa Inicializado!",
-      "Por=":   "Porção-------------------------->",
-      "PesA=":  "Liberando---------------------->",
-      "QtdA=":  "Cada porção será dividida em:",
+      "IniA=": "Iniciando alimentação:",
+      "IniP=": "Programa Inicializado!",
+      "Por=": "Porção-------------------------->",
+      "PesA=": "Liberando---------------------->",
+      "QtdA=": "Cada porção será dividida em:",
       "QtdKg=": "Quantidade de ração diária:",
-      "QtdP=":  "Quantidade de porções diária:",
+      "QtdP=": "Quantidade de porções diária:",
       "QtdRA=": "Quantidade de ração por arremesso:",
       "QtdRP=": "Quantidade de Ração por porções:",
       "TempA=": "Tempo de arremesso--->",
-      "T=":     "Temperatura do sensor:",
-
+      "T=": "Temperatura do sensor:",
     };
 
     for (final code in codeMap.keys) {
@@ -519,10 +528,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             return result;
           } else if (code == "H=") {
             final d = value.substring(0, value.indexOf("_"));
-            final m = value.substring(value.indexOf("_") + 1, value.lastIndexOf("_"));
-            final a = value.substring(value.lastIndexOf("_") + 1, value.indexOf(" "));
-            final h = value.substring(value.indexOf(" ") + 1, value.indexOf(":"));
-            final mn = value.substring(value.indexOf(":") + 1, value.lastIndexOf(":"));
+            final m =
+                value.substring(value.indexOf("_") + 1, value.lastIndexOf("_"));
+            final a =
+                value.substring(value.lastIndexOf("_") + 1, value.indexOf(" "));
+            final h =
+                value.substring(value.indexOf(" ") + 1, value.indexOf(":"));
+            final mn =
+                value.substring(value.indexOf(":") + 1, value.lastIndexOf(":"));
             final s = value.substring(value.lastIndexOf(":") + 1);
 
             final formattedDate = "$d/$m/$a $h:$mn:$s";
@@ -562,18 +575,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             return result;
           } else if (code == "FimC=") {
             final result = "${codeMap[code]} $value ";
-            _pressCount=1;
+            _pressCount = 1;
             return result;
           } else if (code == "Ci=") {
-            _pressCount=2;
+            _pressCount = 2;
             final result = "${codeMap[code]} $value ";
             return result;
           } else if (code == "Fim1=") {
-            _pressCount=3;
+            _pressCount = 3;
             final result = "${codeMap[code]} $value ";
             return result;
           } else if (code == "Fim2=") {
-            _pressCount=1;
+            _pressCount = 1;
             final result = "${codeMap[code]} $value ";
             return result;
           } else if (code == "C2=") {
@@ -618,7 +631,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             return result;
           } else if (code == "ITemp=") {
             final hora = value.substring(0, value.indexOf(":"));
-            final minuto = value.substring(value.indexOf(":") + 1, value.lastIndexOf(":"));
+            final minuto =
+                value.substring(value.indexOf(":") + 1, value.lastIndexOf(":"));
             final segundo = value.substring(value.lastIndexOf(":") + 1);
             final result = "${codeMap[code]}:\n$hora:$minuto:$segundo";
             print("Input text: $text");
@@ -649,7 +663,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Future<void> _handleButtonPress() async {
     //_pressCount++;
-
 
     switch (_pressCount) {
       case 1:
@@ -691,6 +704,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     setState(() {
       _devicesList = devices;
     });
+  }
+
+  void goToA300Tab() {
+    _tabController.animateTo(1); // Índice 1 corresponde à aba A300
   }
 
   Widget _buildBluetoothTab() {
@@ -801,7 +818,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             ? Icon(Icons.check_circle, color: Colors.green)
                             : Icon(Icons.circle, color: Colors.red),
                         onTap: () {
-                          if (isConnected && device == _connectedDevice) {
+                          if (isConnected /*&& device == _connectedDevice*/) {
                             // Disconnect from device
                             _disconnect();
                           } else if (!isConnected) {
@@ -815,9 +832,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 )
                 .toList(),
           ),
-
           SizedBox(height: 30),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -835,7 +850,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ],
           ),
           Divider(thickness: 10, color: Colors.blue),
-
           SizedBox(height: 50),
         ],
       ),
@@ -886,27 +900,27 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       height: 250,
                       child: isConnected
                           ? ListView.builder(
-                        itemCount: _receivedMessages.length,
-                        itemBuilder: (context, index) {
-                          String processedText = _receivedMessages[index];
-                          return Text(
-                            processedText,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Noto Sans',
-                            ),
-                          );
-                        },
-                      )
+                              itemCount: _receivedMessages.length,
+                              itemBuilder: (context, index) {
+                                String processedText = _receivedMessages[index];
+                                return Text(
+                                  processedText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'Noto Sans',
+                                  ),
+                                );
+                              },
+                            )
                           : Center(
-                        child: Text(
-                          'Equipamento Desconectado',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'Noto Sans',
-                          ),
-                        ),
-                      ),
+                              child: Text(
+                                'Equipamento Desconectado',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'Noto Sans',
+                                ),
+                              ),
+                            ),
                     ),
                   ],
                 ),
@@ -929,7 +943,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Row(
@@ -947,30 +960,31 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       child: Text('Configurar A300'),
                       onPressed: isConnected
                           ? () async {
-                        if (isConnected) {
-                          // Navega para a página ConfigurationPage e espera pela string de retorno
-                          String? calibracao = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ConfigurationPage(),
-                            ),
-                          );
+                              if (isConnected) {
+                                // Navega para a página ConfigurationPage e espera pela string de retorno
+                                String? calibracao = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ConfigurationPage(),
+                                  ),
+                                );
 
-                          // Verifica se a string de retorno não é nula
-                          if (calibracao != null) {
-                            // Atualize a variável calibracao com a string retornada
-                            setState(() async {
-                              this.calibracao = calibracao;
-                              try {
-                                await _sendMessage(calibracao);
-                              } catch (error) {
-                                // Lidar com o erro (timeout ou outro erro)
-                                print('Erro ao enviar a mensagem: $error');
+                                // Verifica se a string de retorno não é nula
+                                if (calibracao != null) {
+                                  // Atualize a variável calibracao com a string retornada
+                                  setState(() async {
+                                    this.calibracao = calibracao;
+                                    try {
+                                      await _sendMessage(calibracao);
+                                    } catch (error) {
+                                      // Lidar com o erro (timeout ou outro erro)
+                                      print(
+                                          'Erro ao enviar a mensagem: $error');
+                                    }
+                                  });
+                                }
                               }
-                            });
-                          }
-                        }
-                      }
+                            }
                           : null,
                     ),
                   ),
@@ -979,7 +993,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     decoration: BoxDecoration(),
                     child: ElevatedButton(
                       child: Text('Calibrar'),
-                      onPressed: ()  {
+                      onPressed: () {
                         _handleButtonPress();
                       },
                       style: ElevatedButton.styleFrom(
@@ -1024,19 +1038,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         child: Text('Enviar'),
                         onPressed: isConnected
                             ? () async {
-                          if (isConnected) {
-                            String message =
-                                _messageTextFieldController.text;
-                            try {
-                              await _sendMessage(
-                                  message);} catch (error) {
-                              // Lidar com o erro (timeout ou outro erro)
-                              print('Erro ao enviar a mensagem: $message');
-                            } // Chamar a função _sendMessage() com a mensagem digitada
-                            _messageTextFieldController.clear();
-                            FocusScope.of(context).unfocus();
-                          }
-                        }
+                                if (isConnected) {
+                                  String message =
+                                      _messageTextFieldController.text;
+                                  try {
+                                    await _sendMessage(message);
+                                  } catch (error) {
+                                    // Lidar com o erro (timeout ou outro erro)
+                                    print(
+                                        'Erro ao enviar a mensagem: $message');
+                                  } // Chamar a função _sendMessage() com a mensagem digitada
+                                  _messageTextFieldController.clear();
+                                  FocusScope.of(context).unfocus();
+                                }
+                              }
                             : null,
                       ),
                     ),
@@ -1060,10 +1075,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child: Text('Ligar'),
             onLongPress: isConnected
                 ? () async {
-                  try { await _sendMessage("Ligar");} catch (error) {
-                    // Lidar com o erro (timeout ou outro erro)
-                    print('Erro ao enviar a mensagem: $error');
-                  }
+                    try {
+                      await _sendMessage("Ligar");
+                    } catch (error) {
+                      // Lidar com o erro (timeout ou outro erro)
+                      print('Erro ao enviar a mensagem: $error');
+                    }
                   }
                 : null,
             onPressed: () {},
@@ -1209,7 +1226,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                         readOnly: true,
                         onTap: _selectTime,
                         controller: TextEditingController(
-                          text: '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
+                          text:
+                              '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
                         ),
                         keyboardType: TextInputType.datetime,
                         decoration: InputDecoration(
@@ -1234,7 +1252,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                         readOnly: true,
                         onTap: _selectTimeFim,
                         controller: TextEditingController(
-                          text: '${selectedTimeFim.hour.toString().padLeft(2, '0')}:${selectedTimeFim.minute.toString().padLeft(2, '0')}',
+                          text:
+                              '${selectedTimeFim.hour.toString().padLeft(2, '0')}:${selectedTimeFim.minute.toString().padLeft(2, '0')}',
                         ),
                         keyboardType: TextInputType.datetime,
                         decoration: InputDecoration(
@@ -1243,7 +1262,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                           labelStyle: TextStyle(fontSize: 20),
                           hintText: 'Informe a hora de término',
                           hintStyle: TextStyle(fontSize: 16),
-                          prefixIcon: Icon(Icons.access_time_filled_outlined , size: 24),
+                          prefixIcon:
+                              Icon(Icons.access_time_filled_outlined, size: 24),
                           contentPadding: EdgeInsets.symmetric(vertical: 8),
                           isDense: true,
                         ),
@@ -1289,7 +1309,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                           hintStyle: TextStyle(fontSize: 16),
                           labelText: 'Dividir em quantas porções?',
                           suffixIcon: Icon(Icons.arrow_drop_down, size: 24),
-                          prefixIcon: Icon(Icons.format_list_numbered, size: 24),
+                          prefixIcon:
+                              Icon(Icons.format_list_numbered, size: 24),
                         ),
                         controller: TextEditingController(text: porcao),
                         readOnly: true,
@@ -1304,11 +1325,15 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       porcao = newValue ?? '';
-                                      porcoes = newValue != null ? int.parse(newValue) : 1;
+                                      porcoes = newValue != null
+                                          ? int.parse(newValue)
+                                          : 1;
                                       Navigator.of(context).pop();
                                     });
                                   },
-                                  items: List<DropdownMenuItem<String>>.generate(30, (index) {
+                                  items:
+                                      List<DropdownMenuItem<String>>.generate(
+                                          30, (index) {
                                     int value = index + 1;
                                     return DropdownMenuItem<String>(
                                       value: value.toString(),
@@ -1323,7 +1348,6 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                       ),
                     ),
                   ),
-
                   Container(
                     margin: EdgeInsets.only(bottom: 12),
                     child: Padding(
@@ -1337,16 +1361,19 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                           border: OutlineInputBorder(),
                           labelStyle: TextStyle(fontSize: 20),
                           hintStyle: TextStyle(fontSize: 16),
-                          prefixIcon: Icon(Icons.format_list_bulleted, size: 24),
+                          prefixIcon:
+                              Icon(Icons.format_list_bulleted, size: 24),
                         ),
-                        controller: TextEditingController(text: subdivisaoPorcoes),
+                        controller:
+                            TextEditingController(text: subdivisaoPorcoes),
                         readOnly: true,
                         onTap: () {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: Text('Selecione em quantas vezes subdividir'),
+                                title: Text(
+                                    'Selecione em quantas vezes subdividir'),
                                 content: DropdownButton<String>(
                                   value: subdivisaoPorcoes,
                                   onChanged: (String? newValue) {
@@ -1356,7 +1383,9 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                                       Navigator.of(context).pop();
                                     });
                                   },
-                                  items: List<DropdownMenuItem<String>>.generate(5, (index) {
+                                  items:
+                                      List<DropdownMenuItem<String>>.generate(5,
+                                          (index) {
                                     int value = index + 1;
                                     return DropdownMenuItem<String>(
                                       value: value.toString(),
@@ -1371,7 +1400,6 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                       ),
                     ),
                   ),
-
                   Container(
                     margin: EdgeInsets.only(bottom: 12),
                     child: Padding(
@@ -1387,7 +1415,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                           hintStyle: TextStyle(fontSize: 16),
                           prefixIcon: Icon(Icons.more_time, size: 24),
                         ),
-                        controller: TextEditingController(text: tempoIntervalo.toString()),
+                        controller: TextEditingController(
+                            text: tempoIntervalo.toString()),
                         readOnly: true,
                         onTap: () {
                           if (arremessos > 1) {
@@ -1395,7 +1424,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text('Selecione o intervalo em minutos'),
+                                  title:
+                                      Text('Selecione o intervalo em minutos'),
                                   content: DropdownButton<String>(
                                     value: tempoIntervalo.toString(),
                                     onChanged: (String? newValue) {
@@ -1405,7 +1435,9 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                                         Navigator.of(context).pop();
                                       });
                                     },
-                                    items: List<DropdownMenuItem<String>>.generate(5, (index) {
+                                    items:
+                                        List<DropdownMenuItem<String>>.generate(
+                                            5, (index) {
                                       int value = index + 1;
                                       return DropdownMenuItem<String>(
                                         value: value.toString(),
@@ -1421,7 +1453,6 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                       ),
                     ),
                   ),
-
                   Text(" $dia/$mes/$ano "),
                   Text("$hora:$minuto:$segundo"),
                 ],
@@ -1463,7 +1494,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                       }
 
                       calibracao =
-                      'S,$horaIni,$minutoIni,$horaFim,$minutoFim,$peso,$porcoes,$arremessos,$intervalo,'
+                          'S,$horaIni,$minutoIni,$horaFim,$minutoFim,$peso,$porcoes,$arremessos,$intervalo,'
                           '$ano,$mes,$dia,$hora,$minuto,$segundo,F';
 
                       Navigator.pop(context, calibracao);
