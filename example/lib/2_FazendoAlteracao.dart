@@ -305,6 +305,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
       _refreshList();
       _showToast(context, "Desconectado");
+      Timer(Duration(milliseconds: 1000), () {
+        goToBluetooth();
+      });
 
       _pressCount =
           1; // Reseta contador da calibração caso desconecte no meio da calibração
@@ -470,8 +473,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       "FimP=": "Fim da porção:",
       "FimR=": "Fora do periodo de Alimentação!",
       "H=": "Data e Hora",
-      "Hi=": "Hora do Início da Alimentação",
-      "Hf=": "Hora do Fim da Alimentação",
+      "Hi=": "    Configurações atuais do Equipamento\n"
+          "\nHora para o Início da Alimentação",
+      "Hf=": "Hora para o Fim da Alimentação",
       "Int=": "Intervalo----------------------->",
       "IntA=": "Intervalo entre cada arremesso",
       "ITemp=": "Intervalo entre cada porção",
@@ -708,6 +712,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   void goToA300Tab() {
     _tabController.animateTo(1); // Índice 1 corresponde à aba A300
+  }
+  void goToBluetooth() {
+    _tabController.animateTo(0); // Índice 0 corresponde à aba Bluetooth
   }
 
   Widget _buildBluetoothTab() {
