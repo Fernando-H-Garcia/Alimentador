@@ -101,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           controller: _tabController,
           tabs: [
             Tab(icon: Icon(Icons.bluetooth), text: 'Bluetooth'),
-            Tab(icon: Icon(Icons.settings), text: 'A300'),
+            Tab(icon: Icon(Icons.settings), text: '$_connectedDeviceName'),
             Tab(icon: Icon(Icons.file_upload), text: 'Controle'),
           ],
         ),
@@ -224,10 +224,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   // Method to connect to a device
   void _connect(BluetoothDevice device) async {
-    setState(() {
-      _connectedDeviceName = device.name ?? 'Bluetooth sem nome';
-      _connectedDevice = device;
-    });
 
     if (connection != null) {
       // Dispose old connection
@@ -238,6 +234,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     try {
       // Connect to the device
       connection = await BluetoothConnection.toAddress(device.address);
+      setState(() {
+        _connectedDeviceName = device.name ?? 'Bluetooth sem nome';
+        _connectedDevice = device;
+      });
       _refreshList();
       _showToast(context, 'Conectado a ${device.name}');
       _receivedMessages.clear();
@@ -305,6 +305,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
       _refreshList();
       _showToast(context, "Desconectado");
+      _connectedDeviceName="";
       Timer(Duration(milliseconds: 1000), () {
         goToBluetooth();
       });
@@ -964,7 +965,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                         backgroundColor: Colors.green,
                       ),
-                      child: Text('Configurar A300'),
+                      child: Text('Configurar $_connectedDeviceName'),
                       onPressed: isConnected
                           ? () async {
                               if (isConnected) {
