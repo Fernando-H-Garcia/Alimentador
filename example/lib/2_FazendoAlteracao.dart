@@ -465,7 +465,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       "#=": "###############################",
       "Arre=": "Arremesso-------------------->",
       "Ci=": "                    Calibração Iniciada!\n "
-          "\n1° Antes de continuar, certifique-se de encher o equipamento com ração e apertar o botão até encher completamente a rosca!\n"
+          "\n1° Antes de continuar, certifique-se de encher o equipamento com ração e apertar o botão (Ligar Rosca) até começar a sair bastante ração!\n"
           "\n2° Tenha em mãos uma balança com precisão de pelo menos 5g\n"
           "\n3° Em seguida, coloque um pote para armazenar a primeira porção de ração, aperte o botão Calibrar e aguarde!\n",
       "Fim1=": "                   Fim da primeira porção\n "
@@ -779,78 +779,34 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           SizedBox(height: 20),
           Divider(thickness: 10, color: Colors.blue),
           Text('Selecione o equipamento:', style: TextStyle(fontSize: 20)),
-          ListView(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            children: _devicesList
-                .map(
-                  (device) => Dismissible(
-                    key: Key(device.address),
-                    onDismissed: (direction) async {
-                      // Desconectar do dispositivo, se estiver conectado
-                      if (isConnected && device == _connectedDevice) {
-                        _disconnect();
-                        _refreshList();
-                      }
-
-                      // Exibir diálogo para remover manualmente o dispositivo pareado
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text('Deseja remover dispositivo pareado?'),
-                          content: Text(
-                            'É necessário remover manualmente o dispositivo "${device.name}" nas configurações Bluetooth do seu dispositivo.',
-                          ),
-                          actions: [
-                            TextButton(
-                              child: Text('OK'),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-
-                      // Remover o dispositivo da lista
-                      setState(() {
-                        _devicesList.remove(device);
-                      });
-                    },
-                    background: Container(
-                      color: Colors.red,
-                      child: Icon(Icons.delete, color: Colors.white),
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(right: 20),
-                    ),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                          width: 6,
-                          color: Colors.blue,
-                        ),
-                      ),
-                      child: ListTile(
-                        title: Text(device.name ?? 'Bluetooth sem nome'),
-                        subtitle: Text(device.address),
-                        trailing: isConnected && device == _connectedDevice
-                            ? Icon(Icons.check_circle, color: Colors.green)
-                            : Icon(Icons.circle, color: Colors.red),
-                        onTap: () {
-                          if (isConnected /*&& device == _connectedDevice*/) {
-                            // Disconnect from device
-                            _disconnect();
-                          } else if (!isConnected) {
-                            // Connect to device
-                            _connect(device);
-                          }
-                        },
-                      ),
-                    ),
+          Column(
+            children: _devicesList.map((device) {
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    width: 6,
+                    color: Colors.blue,
                   ),
-                )
-                .toList(),
+                ),
+                child: ListTile(
+                  title: Text(device.name ?? 'Bluetooth sem nome'),
+                  subtitle: Text(device.address),
+                  trailing: isConnected && device == _connectedDevice
+                      ? Icon(Icons.check_circle, color: Colors.green)
+                      : Icon(Icons.circle, color: Colors.red),
+                  onTap: () {
+                    if (isConnected /*&& device == _connectedDevice*/) {
+                      // Disconnect from device
+                      _disconnect();
+                    } else if (!isConnected) {
+                      // Connect to device
+                      _connect(device);
+                    }
+                  },
+                ),
+              );
+            }).toList(),
           ),
           SizedBox(height: 30),
           Row(
@@ -958,7 +914,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(1.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1211,18 +1167,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   child: Container(
                     child: Center(
                       child: Text(
-                        'Ligar',
+                        'Ligar Rosca',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    width: 70,
+                    width: 100,
                     height: 50,
                     decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
                       color: isConnected ? Colors.blue : Colors.grey,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
                 ),
