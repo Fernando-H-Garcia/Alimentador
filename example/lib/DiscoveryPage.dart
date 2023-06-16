@@ -77,8 +77,8 @@ class _DiscoveryPage extends State<DiscoveryPage> {
     return Scaffold(
       appBar: AppBar(
         title: isDiscovering
-            ? Text('Discovering devices')
-            : Text('Discovered devices'),
+            ? Text('Buscando...')
+            : Text('Descobertos:'),
         actions: <Widget>[
           isDiscovering
               ? FittedBox(
@@ -97,15 +97,25 @@ class _DiscoveryPage extends State<DiscoveryPage> {
       ),
       body: Column(
         children: [
+          Divider(thickness: 5,color: Colors.blue),
+          SizedBox(height: 20,),
           //Divider(thickness: 10,color: Colors.blue),
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(1.0),
-              child: Text('Aperte e segure no nome do equipamento para parear ou desparear!',
-                style: TextStyle(fontSize: 20),),
+              padding: const EdgeInsets.all(5.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Selecione o equipamento',
+                    style: TextStyle(fontSize: 20),softWrap: true,
+                  ),
+                ],
+              ),
             ),
           ),
-          Divider(thickness: 5,color: Colors.blue),
+          SizedBox(height: 20),
+          Divider(thickness: 5, color: Colors.blue),
           Expanded(
             child: ListView.builder(
               itemCount: results.length,
@@ -116,10 +126,7 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                 return BluetoothDeviceListEntry(
                   device: device,
                   rssi: result.rssi,
-                  onTap: () {
-                    //Navigator.of(context).pop(result.device);
-                  },
-                  onLongPress: () async {
+                  onTap: () async {
                     try {
                       bool bonded = false;
                       if (device.isBonded) {
@@ -151,11 +158,11 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: const Text('Error occured while bonding'),
+                            title: const Text('Ocorreu um erro ao tentar parear'),
                             content: Text("${ex.toString()}"),
                             actions: <Widget>[
                               new TextButton(
-                                child: new Text("Close"),
+                                child: new Text("Fechar"),
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
