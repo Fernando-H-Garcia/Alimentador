@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Eng & Life',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
       ),
       navigatorKey: navigatorKey, // Assign the navigator key
       home: MyHomePage(title: 'Eng & Life'),
@@ -83,6 +83,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   bool isCalibrating = false;
 
+  bool roscaLigada = false;
 // Declare a stream subscription for discovery events
   StreamSubscription<BluetoothDiscoveryResult>? _streamSubscription;
 
@@ -310,15 +311,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _refreshList();
       _showToast(context, "Desconectado");
       _connectedDeviceName = "";
-      isCalibrating=false;// Indica o fim da calibração
-      _receivedMessages.clear();//
+      isCalibrating = false; // Indica o fim da calibração
+      _receivedMessages.clear(); //
       Timer(Duration(milliseconds: 1000), () {
         goToBluetooth();
       });
 
       _pressCount =
           1; // Reseta contador da calibração caso desconecte no meio da calibração
-
     });
 
     setState(() {
@@ -588,8 +588,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           } else if (code == "FimC=") {
             final result = "${codeMap[code]} $value ";
             _pressCount = 1;
-            isCalibrating=false;// Indica o fim da calibração
-            _receivedMessages.clear();//
+            isCalibrating = false; // Indica o fim da calibração
+            _receivedMessages.clear(); //
             return result;
           } else if (code == "Ci=") {
             _pressCount = 2;
@@ -682,7 +682,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       case 1:
         _receivedMessages.clear();
         await _sendMessage("Calibrar");
-        isCalibrating=true;
+        isCalibrating = true;
         //@TODO Após apertar em calibrar tem que travar ou mudar a função do botão Limpar mensagens e Configurar A300 preciso de um botão Cancelar e um botão Ligar rosca ou lançar porção
         break;
       case 2:
@@ -765,20 +765,22 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               Text('ON ', style: TextStyle(fontSize: 24)),
             ],
           ),
-          Divider(thickness: 10, color: Colors.blue),
+          Divider(thickness: 10, color: Colors.green),
           SizedBox(height: 10),
           const Text(
               'O equipamento não aparece na lista? \nClique em (Buscar Equipamento).',
               style: TextStyle(fontSize: 20)),
           SizedBox(height: 10),
           ElevatedButton(
-            child: const Text('Buscar Equipamento'),
+            child: const Text('Buscar Equipamento',
+            textScaleFactor: 1.7),
             onPressed:
                 _navigateToDiscoveryPage, // Substitua pelo nome correto da função
           ),
           SizedBox(height: 20),
-          Divider(thickness: 10, color: Colors.blue),
+          Divider(thickness: 10, color: Colors.green),
           Text('Selecione o equipamento:', style: TextStyle(fontSize: 20)),
+          Divider(thickness: 2, color: Colors.grey),
           Column(
             children: _devicesList.map((device) {
               return Card(
@@ -786,7 +788,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(10),
                   side: BorderSide(
                     width: 6,
-                    color: Colors.blue,
+                    color: Colors.green,
                   ),
                 ),
                 child: ListTile(
@@ -821,11 +823,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   });
                 },
                 icon: Icon(Icons.refresh),
-                label: Text('Atualizar lista de equipamentos'),
+                label: Text('Atualizar lista de equipamentos',
+                    textScaleFactor: 1.5),
               ),
             ],
           ),
-          Divider(thickness: 10, color: Colors.blue),
+          Divider(thickness: 10, color: Colors.green),
           SizedBox(height: 50),
         ],
       ),
@@ -876,52 +879,75 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       height: 400,
                       child: isConnected
                           ? isCalibrating
-                          ? Center(
-                        child: Text(
-                          'Calibração em andamento!',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'Noto Sans',
-                          ),
-                        ),
-                      )
-                          : ListView.builder(
-                        itemCount: _receivedMessages.length,
-                        itemBuilder: (context, index) {
-                          String processedText = _receivedMessages[index];
-                          return Text(
-                            processedText,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Noto Sans',
-                            ),
-                          );
-                        },
-                      )
+                              ? Center(
+                                  child: Text(
+                                    'Calibração em andamento!',
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 20,
+                                      fontFamily: 'Noto Sans',
+                                    ),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  itemCount: _receivedMessages.length,
+                                  itemBuilder: (context, index) {
+                                    String processedText =
+                                        _receivedMessages[index];
+                                    return Text(
+                                      processedText,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'Noto Sans',
+                                      ),
+                                    );
+                                  },
+                                )
                           : Center(
-                        child: Text(
-                          'Equipamento Desconectado!',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'Noto Sans',
-                          ),
-                        ),
-                      ),
+                              child: Text(
+                                'Equipamento Desconectado!',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 20,
+                                  fontFamily: 'Noto Sans',
+                                ),
+                              ),
+                            ),
                     ),
                   ],
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(1.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  Container(height: 70,
+
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                        onPressed:isConnected? () async {
+                          _receivedMessages.clear();
+                          await _sendMessage("Info");
+                          // Função a ser executada ao pressionar o novo botão
+                        }:null,
+                        child: Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.white,
+                          size: 60,
+                        ),
+                      ),
+                  ),
+                  SizedBox(width: 10), // Espaçamento entre os botões
                   Container(
-                    width: 300, // Defina a largura desejada aqui
+                    width: 250, // Defina a largura desejada aqui
                     height: 70,
-                    decoration: BoxDecoration(),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -929,38 +955,39 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                         backgroundColor: Colors.green,
                       ),
-                      child: Text('Configurar $_connectedDeviceName',textScaleFactor: 1.5,
+                      child: Text(
+                        'Configurar $_connectedDeviceName',
+                        textScaleFactor:1.7,
                       ),
                       onPressed: isConnected && !isCalibrating
                           ? () async {
-                              if (isConnected) {
-                                // Navega para a página ConfigurationPage e espera pela string de retorno
-                                String? calibracao = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ConfigurationPage(
-                                        connectedDeviceName:
-                                            _connectedDeviceName,
-                                      ),
-                                    ));
+                        if (isConnected) {
+                          // Navega para a página ConfigurationPage e espera pela string de retorno
+                          String? calibracao = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ConfigurationPage(
+                                connectedDeviceName: _connectedDeviceName,
+                              ),
+                            ),
+                          );
 
-                                // Verifica se a string de retorno não é nula
-                                if (calibracao != null && isConnected) {
-                                  // Atualize a variável calibracao com a string retornada
-                                  setState(() async {
-                                    this.calibracao = calibracao;
-                                    try {
-                                      _receivedMessages.clear();
-                                      await _sendMessage(calibracao);
-                                    } catch (error) {
-                                      // Lidar com o erro (timeout ou outro erro)
-                                      print(
-                                          'Erro ao enviar a mensagem: $error');
-                                    }
-                                  });
-                                }
+                          // Verifica se a string de retorno não é nula
+                          if (calibracao != null && isConnected) {
+                            // Atualize a variável calibracao com a string retornada
+                            setState(() async {
+                              this.calibracao = calibracao;
+                              try {
+                                _receivedMessages.clear();
+                                await _sendMessage(calibracao);
+                              } catch (error) {
+                                // Lidar com o erro (timeout ou outro erro)
+                                print('Erro ao enviar a mensagem: $error');
                               }
-                            }
+                            });
+                          }
+                        }
+                      }
                           : null,
                     ),
                   ),
@@ -969,229 +996,252 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
 
           ],
-        ),
+        ), //row aqui
       ),
     );
   }
 
   Widget _buildCalibraTab() {
     return SingleChildScrollView(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 5),
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                padding: EdgeInsets.all(10.0),
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(25),
-                          topRight: Radius.circular(25.0),
-                        ),
-                        color: Colors.green,
-                      ),
-                      child: AppBar(
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        centerTitle: true,
-                        title: Text(
-                          'Siga as instruções!',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                    ),
-                    Divider(thickness: 2, color: Colors.grey),
-                    SizedBox(height: 2),
-                    Container(
-                      height: 285,
-                      child: isConnected && isCalibrating
-                          ? ListView.builder(
-                        itemCount: _receivedMessages.length,
-                        itemBuilder: (context, index) {
-                          String processedText =
-                          _receivedMessages[index];
-                          return Text(
-                            processedText,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Noto Sans',
-                            ),
-                          );
-                        },
-                      )
-                          : Center(
-                        child: isConnected
-                            ? Text(
-                          'Calibração desativada! \n \n Aperte (Calibrar) para \ndar início à calibração.',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'Noto Sans',
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 5),
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  padding: EdgeInsets.all(10.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(25),
+                            topRight: Radius.circular(25.0),
                           ),
-                        )
-                            : Text(
-                          'Equipamento Desconectado',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'Noto Sans',
+                          color: Colors.green,
+                        ),
+                        child: AppBar(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          centerTitle: true,
+                          title: Text(
+                            'Siga as instruções!',
+                            style: TextStyle(fontSize: 18),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      Divider(thickness: 2, color: Colors.grey),
+                      SizedBox(height: 2),
+                      Container(
+                        height: 285,
+                        child: isConnected && isCalibrating
+                            ? ListView.builder(
+                                itemCount: _receivedMessages.length,
+                                itemBuilder: (context, index) {
+                                  String processedText = _receivedMessages[index];
+                                  return Text(
+                                    processedText,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'Noto Sans',
+                                    ),
+                                  );
+                                },
+                              )
+                            : Center(
+                                child: isConnected
+                                    ? roscaLigada
+                                        ? Text(
+                                            'Rosca Ligada!',
+                                            style: TextStyle(
+                                              color: Colors.green,
+                                              fontSize: 34,
+                                              fontFamily: 'Noto Sans',
+                                            ),
+                                          )
+                                        : Text(
+                                            'Calibração desativada! \n \n Aperte (Calibrar) para \ndar início à calibração.',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Noto Sans',
+                                            ),
+                                          )
+                                    : Text(
+                                        'Equipamento Desconectado!',
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 20,
+                                          fontFamily: 'Noto Sans',
+                                        ),
+                                      ),
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    child: Text('Cancelar'),
-                    onPressed: isConnected && isCalibrating? () async {
-                      await _sendMessage("Cancelar");
-                    } : null,
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                      ),
-                      backgroundColor: isConnected ? Colors.green : Colors.grey,
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  Container(
-                    decoration: BoxDecoration(),
-                    child: ElevatedButton(
-                      child: Text('Calibrar $_connectedDeviceName'),
-                      onPressed: isConnected ? () {
-                        _handleButtonPress();
-                      } : null,
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
                         ),
-                        backgroundColor: isConnected ? Colors.green : Colors.grey,
+                        backgroundColor: Colors.green,
+                        minimumSize: Size(100, 50),
                       ),
+                      child: Text('Cancelar',
+                          textScaleFactor: 1.7),
+                      onPressed: isConnected && isCalibrating
+                          ? () async {
+                              await _sendMessage("Cancelar");
+                            }
+                          : null,
                     ),
-                  ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        backgroundColor: Colors.green,
+                        minimumSize: Size(100, 50),
+                      ),
+                      child: Text('Calibrar $_connectedDeviceName',
+                          textScaleFactor: 1.7),
+                      onPressed: isConnected
+                          ? () {
+                              _handleButtonPress();
+                            }
+                          : null,
 
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            SizedBox(height: 10), // Espaçamento adicional entre os widgets
+              //SizedBox(height: 10), // Espaçamento adicional entre os widgets
 
-            Column(
-              children: [
-                GestureDetector(
-                  onDoubleTap: () {
-                    FocusScope.of(context).unfocus();
-                  },
-                  child: Container(
+              Column(
+                children: [
+                  Container(
                     constraints: BoxConstraints(maxWidth: 270, maxHeight: 50),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey, width: 1),
                       borderRadius: BorderRadius.circular(5),
                       color: Colors.grey[200],
                     ),
-                    child: Row(
+                    child: isCalibrating&& _pressCount==3? Row(
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextField(
-                              controller: _messageTextFieldController,
-                              decoration: InputDecoration(
-                                hintText: 'Digite o peso',
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
+                    padding: const EdgeInsets.all(8.0),
+        child: TextField(
+          controller: _messageTextFieldController,
+          decoration: InputDecoration(
+            hintText: 'Digite o peso',
+            border: InputBorder.none,
+          ),
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+          ],
+        ),
+      ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
-                            child: Text('Enviar'),
+                            child: Text('Enviar',
+                                textScaleFactor: 1.7),
                             onPressed: isConnected
                                 ? () async {
-                              if (isConnected) {
-                                String message =
-                                    _messageTextFieldController.text;
-                                try {
-                                  await _sendMessage(message);
-                                } catch (error) {
-                                  print(
-                                      'Erro ao enviar a mensagem: $message');
-                                }
-                                _messageTextFieldController.clear();
-                                FocusScope.of(context).unfocus();
-                              }
-                            }
+                                    if (isConnected) {
+                                      String message =
+                                          _messageTextFieldController.text;
+                                      try {
+                                        await _sendMessage("C,$message,F");
+                                      } catch (error) {
+                                        print(
+                                            'Erro ao enviar a mensagem: $message');
+                                      }
+                                      _messageTextFieldController.clear();
+                                      FocusScope.of(context).unfocus();
+                                    }
+                                  }
                                 : null,
                           ),
                         ),
                       ],
-                    ),
+                    ):null,
                   ),
-                ),
-                SizedBox(height: 10), // Espaçamento adicional entre os widgets
-                GestureDetector(
-                  onLongPress: () async {
-                    if (isConnected) {
-                      try {
-                        await _sendMessage("Liga1");
-                      } catch (error) {
-                        print('Erro ao enviar a mensagem: $error');
+                  SizedBox(height: 10), // Espaçamento adicional entre os widgets
+                  GestureDetector(
+                    onLongPress: () async {
+                      if (isConnected) {
+                        try {
+                          await _sendMessage("Liga1");
+                          setState(() {
+                            roscaLigada = true;
+                          });
+                        } catch (error) {
+                          print('Erro ao enviar a mensagem: $error');
+                        }
                       }
-                    }
-                  },
-                  onLongPressUp: () async {
-                    if (isConnected) {
-                      try {
-                        await _sendMessage("Desliga1");
-                      } catch (error) {
-                        print('Erro ao enviar a mensagem: $error');
+                    },
+                    onLongPressUp: () async {
+                      if (isConnected) {
+                        try {
+                          await _sendMessage("Desliga1");
+                          setState(() {
+                            roscaLigada = false;
+                          });
+                        } catch (error) {
+                          print('Erro ao enviar a mensagem: $error');
+                        }
                       }
-                    }
-                  },
-                  child: Container(
-                    child: Center(
-                      child: Text(
-                        'Ligar Rosca',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                    },
+                    child: Container(
+                      child: Center(
+                        child: Text(
+                          'Ligar Rosca',
+                          style: TextStyle(color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    width: 100,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      color: isConnected ? Colors.blue : Colors.grey,
-                      borderRadius: BorderRadius.circular(15),
+                      width: 140,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(25),
+                        color: isConnected ? Colors.green : Colors.grey,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
 
 // Configuration page
 class ConfigurationPage extends StatefulWidget {
@@ -1549,8 +1599,10 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                         borderRadius: BorderRadius.circular(25.0),
                       ),
                       backgroundColor: Colors.green,
+                      minimumSize: Size(100, 50),
                     ),
-                    child: Text('Cancelar'),
+                    child: Text('Cancelar',
+                    textScaleFactor: 1.7),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -1561,8 +1613,10 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                         borderRadius: BorderRadius.circular(25.0),
                       ),
                       backgroundColor: Colors.green,
+                      minimumSize: Size(100, 50),
                     ),
-                    child: Text('Salvar'),
+                    child: Text('Salvar',
+                    textScaleFactor: 1.7),
                     onPressed: () {
                       peso = int.tryParse(pesoController.text) ?? 0;
                       horaIni = selectedTime.hour;

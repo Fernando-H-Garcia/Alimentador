@@ -97,7 +97,7 @@ class _DiscoveryPage extends State<DiscoveryPage> {
       ),
       body: Column(
         children: [
-          Divider(thickness: 5,color: Colors.blue),
+          Divider(thickness: 5,color: Colors.green),
           SizedBox(height: 20,),
           //Divider(thickness: 10,color: Colors.blue),
           Center(
@@ -115,7 +115,7 @@ class _DiscoveryPage extends State<DiscoveryPage> {
             ),
           ),
           SizedBox(height: 20),
-          Divider(thickness: 5, color: Colors.blue),
+          Divider(thickness: 5, color: Colors.green),
           Expanded(
             child: ListView.builder(
               itemCount: results.length,
