@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -204,7 +203,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     // Dispose tab controller
-
+    super.dispose();
     FocusScope.of(context).unfocus(); // Desfoca a caixa de texto
 
     // Dispose connection
@@ -216,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _stopDiscovery();
     _tabController.dispose();
     _messageTextFieldController.dispose();
-    super.dispose();
+
   }
 
 // Method to stop discovery
@@ -259,16 +258,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       _refreshList();
       _showToast(context, 'Erro ao tentar se conectar, tente novamente!');
     }
-  }
-
-  void _onDisconnected() {
-    setState(() {
-      _connectedDevice = null;
-      connection = null;
-    });
-    _refreshList();
-    // Navigate back to the Bluetooth tab
-    //_tabController.animateTo(0); // Assuming Bluetooth tab is at index 0
   }
 
   void _disconnect() async {
@@ -683,7 +672,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         _receivedMessages.clear();
         await _sendMessage("Calibrar");
         isCalibrating = true;
-        //@TODO Após apertar em calibrar tem que travar ou mudar a função do botão Limpar mensagens e Configurar A300 preciso de um botão Cancelar e um botão Ligar rosca ou lançar porção
         break;
       case 2:
         _receivedMessages.clear();
@@ -730,7 +718,36 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _tabController.animateTo(0); // Índice 0 corresponde à aba Bluetooth
   }
 
+
+//@TODO preciso verificar se está posicionando os A300 pra cima da lista e se está organiznado eles em ordem crescente
   Widget _buildBluetoothTab() {
+    // Ordenar a lista de dispositivos, colocando os que começam com "A3" no topo
+    _devicesList.sort((a, b) {
+      final pattern = RegExp(r'A3(\d+)'); // Padrão para extrair os números após "A3"
+      final aMatch = pattern.firstMatch(a.name ?? ''); // Correspondência nos nomes de a
+      final bMatch = pattern.firstMatch(b.name ?? ''); // Correspondência nos nomes de b
+
+      // Verificar se a e b começam com "A3"
+      final aStartsWithA3 = a.name != null && a.name!.startsWith("A3");
+      final bStartsWithA3 = b.name != null && b.name!.startsWith("A3");
+
+      if (aStartsWithA3 && !bStartsWithA3) {
+        return -1; // a vem antes de b
+      } else if (!aStartsWithA3 && bStartsWithA3) {
+        return 1; // b vem antes de a
+      } else if (aStartsWithA3 && bStartsWithA3) {
+        // Extrair os números encontrados nos nomes de a e b
+        final aNumber = int.parse(aMatch?.group(1) ?? '0');
+        final bNumber = int.parse(bMatch?.group(1) ?? '0');
+
+        // Ordenar em ordem crescente com base nos números após "A3"
+        return aNumber.compareTo(bNumber);
+      } else {
+        return 0; // Manter a ordem original
+      }
+    });
+
+
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
@@ -768,18 +785,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Divider(thickness: 10, color: Colors.green),
           SizedBox(height: 10),
           const Text(
-              'O equipamento não aparece na lista? \nClique em (Buscar Equipamento).',
-              style: TextStyle(fontSize: 20)),
+            'O equipamento não aparece na lista? \nClique em (Buscar Equipamento).',
+            style: TextStyle(fontSize: 20),
+          ),
           SizedBox(height: 10),
           ElevatedButton(
-            child: const Text('Buscar Equipamento',
-            textScaleFactor: 1.7),
-            onPressed:
-                _navigateToDiscoveryPage, // Substitua pelo nome correto da função
+            child: const Text(
+              'Buscar Equipamento',
+              textScaleFactor: 1.7,
+            ),
+            onPressed: _navigateToDiscoveryPage, // Substitua pelo nome correto da função
           ),
           SizedBox(height: 20),
           Divider(thickness: 10, color: Colors.green),
-          Text('Selecione o equipamento:', style: TextStyle(fontSize: 20)),
+          Text('Selecione o equipamento\n que deseja configurar:', style: TextStyle(fontSize: 20)),
           Divider(thickness: 2, color: Colors.grey),
           Column(
             children: _devicesList.map((device) {
@@ -817,14 +836,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ElevatedButton.icon(
                 onPressed: () async {
                   final List<BluetoothDevice> devices =
-                      await FlutterBluetoothSerial.instance.getBondedDevices();
+                  await FlutterBluetoothSerial.instance.getBondedDevices();
                   setState(() {
                     _devicesList = devices;
                   });
                 },
                 icon: Icon(Icons.refresh),
-                label: Text('Atualizar lista de equipamentos',
-                    textScaleFactor: 1.5),
+                label: Text('Atualizar lista de equipamentos', textScaleFactor: 1.5),
               ),
             ],
           ),
@@ -834,6 +852,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
     );
   }
+
 
 // Method to build the A300 tab
   Widget _buildA300Tab() {
@@ -1268,7 +1287,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
   int minuto = 0;
   int segundo = 0;
 
-  //@TODO verificar se é preciso receber o valor atual do ESP
+
   int horaIni = 0;
   int minutoIni = 0;
   int horaFim = 0;
