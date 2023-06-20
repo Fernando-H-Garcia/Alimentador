@@ -747,6 +747,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
     });
 
+    // Filtrar os dispositivos cujos nomes iniciam com "A3"
+    final filteredDevicesList = _devicesList.where((device) {
+      return device.name != null && device.name!.startsWith("A3");
+    }).toList();
 
     return SingleChildScrollView(
       child: Column(
@@ -801,7 +805,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Text('Selecione o equipamento\n que deseja configurar:', style: TextStyle(fontSize: 20)),
           Divider(thickness: 2, color: Colors.grey),
           Column(
-            children: _devicesList.map((device) {
+            children: filteredDevicesList.map((device) {
               return Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -852,6 +856,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
     );
   }
+
 
 
 // Method to build the A300 tab
