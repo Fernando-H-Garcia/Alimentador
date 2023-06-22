@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 
-import './MainPage.dart';
-import 'Main_A300.dart';
-import 'Teste IA 2.dart';
+import '2_FazendoAlteracao.dart';
 
-void main() => runApp(new ExampleApplication());
-
-class ExampleApplication extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    //return MaterialApp(home: MainPage());
-    return MaterialApp(home:MyHomePage());
-  }
+void main() {
+  runApp(MyApp());
 }
+
