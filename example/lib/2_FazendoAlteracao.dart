@@ -765,7 +765,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _tabController.animateTo(0); // Índice 0 corresponde à aba Bluetooth
   }
 
-//@TODO preciso verificar se está posicionando os A300 pra cima da lista e se está organiznado eles em ordem crescente
   Widget _buildBluetoothTab() {
     // Ordenar a lista de dispositivos, colocando os que começam com "A3" no topo
     _devicesList.sort((a, b) {

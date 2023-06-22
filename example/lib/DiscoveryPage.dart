@@ -141,6 +141,12 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                         print(
                             'Bonding with ${device.address} has ${bonded ? 'succed' : 'failed'}.');
                       }
+                      if(bonded){
+                        Timer(Duration(milliseconds: 1000), ()
+                        {
+                          Navigator.of(context).pop();
+                        });
+                      }
                       setState(() {
                         results[results.indexOf(result)] = BluetoothDiscoveryResult(
                             device: BluetoothDevice(
