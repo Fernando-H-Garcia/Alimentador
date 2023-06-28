@@ -13,15 +13,9 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application
-        android:label="flutter_bluetooth_serial_example"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Alimentador">
         <activity
-            android:name="io.flutter.embedding.android.FlutterActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/LaunchTheme"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density"
-            android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize">
+            android:name="io.flutter.embedding.android.FlutterActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
